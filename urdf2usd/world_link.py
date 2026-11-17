@@ -82,3 +82,23 @@ def remove_synthetic_root_joint(stage: Usd.Stage) -> bool:
         if parent is not None:
             del parent.nameChildren[spec.name]
     return True
+
+
+def apply_world_link_rule(urdf_path: str | Path, usd_path: str | Path) -> bool:
+    """Apply the world link rule to converter output, saving edited layers.
+
+    Returns True if ``root_joint`` was removed (floating base).
+    """
+    has_world = urdf_has_world_link(urdf_path)
+    stage = Usd.Stage.Open(str(usd_path))
+    if stage is None:
+        raise WorldLinkError(f"cannot open USD {usd_path}")
+    if has_world:
+        return False
+
+    prim = find_synthetic_root_joint(stage)
+    layers = {s.layer for s in prim.GetPrimStack()} if prim else set()
+    removed = remove_synthetic_root_joint(stage)
+    for layer in layers:
+        layer.Save()
+    return removed

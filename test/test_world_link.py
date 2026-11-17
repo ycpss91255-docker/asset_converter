@@ -1,3 +1,5 @@
+import shutil
+import subprocess
 import sys
 import textwrap
 from pathlib import Path
@@ -7,6 +9,7 @@ from pxr import Usd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from urdf2usd.world_link import (  # noqa: E402
+    apply_world_link_rule,
     WorldLinkError,
     find_synthetic_root_joint,
     remove_synthetic_root_joint,
@@ -107,3 +110,29 @@ def test_remove_synthetic_root_joint(tmp_path):
     assert not stage.GetPrimAtPath("/r/Physics/root_joint")
     assert stage.GetPrimAtPath("/r/Physics/w")  # real joints kept
     assert remove_synthetic_root_joint(stage) is False  # idempotent
+
+
+def test_apply_removes_root_joint_when_no_world(tmp_path):
+    urdf, usd = _urdf(tmp_path, MOBILE), _make_usd(tmp_path)
+    assert apply_world_link_rule(urdf, usd) is True
+    assert not Usd.Stage.Open(str(usd)).GetPrimAtPath("/r/Physics/root_joint")
+
+
+def test_apply_keeps_joint_when_world_link_present(tmp_path):
+    urdf = _urdf(tmp_path, '<link name="world"/>' + MOBILE)
+    usd = _make_usd(tmp_path)
+    assert apply_world_link_rule(urdf, usd) is False
+    assert Usd.Stage.Open(str(usd)).GetPrimAtPath("/r/Physics/root_joint")
+
+
+def test_apply_is_idempotent(tmp_path):
+    urdf, usd = _urdf(tmp_path, MOBILE), _make_usd(tmp_path)
+    assert apply_world_link_rule(urdf, usd) is True
+    assert apply_world_link_rule(urdf, usd) is False
+
+
+def test_apply_rejects_non_empty_world_link(tmp_path):
+    urdf = _urdf(tmp_path, '<link name="world"><visual><geometry>'
+                 '<box size="1 1 1"/></geometry></visual></link>' + MOBILE)
+    with pytest.raises(WorldLinkError):
+        apply_world_link_rule(urdf, _make_usd(tmp_path))
