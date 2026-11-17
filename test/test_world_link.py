@@ -1,10 +1,17 @@
 import sys
+import textwrap
 from pathlib import Path
 
 import pytest
+from pxr import Usd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from urdf2usd.world_link import WorldLinkError, urdf_has_world_link  # noqa: E402
+from urdf2usd.world_link import (  # noqa: E402
+    WorldLinkError,
+    find_synthetic_root_joint,
+    remove_synthetic_root_joint,
+    urdf_has_world_link,
+)
 
 LINK = '<link name="{n}"><inertial><mass value="1"/><inertia ixx="1" iyy="1" izz="1" ixy="0" ixz="0" iyz="0"/></inertial><collision><geometry><box size="1 1 1"/></geometry></collision></link>'
 
@@ -52,3 +59,51 @@ def test_malformed_urdf_rejected(tmp_path):
     p.write_text("<robot")
     with pytest.raises(WorldLinkError):
         urdf_has_world_link(p)
+
+
+def _make_usd(tmp_path, root_joint_body0="</r>"):
+    p = tmp_path / "r.usda"
+    p.write_text(textwrap.dedent(f"""\
+        #usda 1.0
+        (defaultPrim = "r")
+        def Xform "r"
+        {{
+            def Xform "base_link" (prepend apiSchemas = ["PhysicsRigidBodyAPI"]) {{}}
+            def Xform "wheel" (prepend apiSchemas = ["PhysicsRigidBodyAPI"]) {{}}
+            def Scope "Physics"
+            {{
+                def PhysicsFixedJoint "root_joint"
+                {{
+                    rel physics:body0 = {root_joint_body0}
+                    rel physics:body1 = </r/base_link>
+                }}
+                def PhysicsRevoluteJoint "w"
+                {{
+                    rel physics:body0 = </r/base_link>
+                    rel physics:body1 = </r/wheel>
+                }}
+            }}
+        }}
+        """))
+    return p
+
+
+def test_find_synthetic_root_joint(tmp_path):
+    stage = Usd.Stage.Open(str(_make_usd(tmp_path)))
+    assert find_synthetic_root_joint(stage).GetPath() == "/r/Physics/root_joint"
+
+
+def test_real_joint_named_root_joint_is_not_synthetic(tmp_path):
+    # body0 is a link, so this is a URDF joint, not the synthetic one
+    stage = Usd.Stage.Open(str(_make_usd(tmp_path, "</r/base_link>")))
+    assert find_synthetic_root_joint(stage) is None
+    assert remove_synthetic_root_joint(stage) is False
+    assert stage.GetPrimAtPath("/r/Physics/root_joint")
+
+
+def test_remove_synthetic_root_joint(tmp_path):
+    stage = Usd.Stage.Open(str(_make_usd(tmp_path)))
+    assert remove_synthetic_root_joint(stage) is True
+    assert not stage.GetPrimAtPath("/r/Physics/root_joint")
+    assert stage.GetPrimAtPath("/r/Physics/w")  # real joints kept
+    assert remove_synthetic_root_joint(stage) is False  # idempotent
