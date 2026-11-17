@@ -136,3 +136,20 @@ def test_apply_rejects_non_empty_world_link(tmp_path):
                  '<box size="1 1 1"/></geometry></visual></link>' + MOBILE)
     with pytest.raises(WorldLinkError):
         apply_world_link_rule(urdf, _make_usd(tmp_path))
+
+
+@pytest.mark.skipif(shutil.which("urdf_usd_converter") is None,
+                    reason="urdf-usd-converter not installed")
+@pytest.mark.parametrize("world", [False, True])
+def test_with_real_converter(tmp_path, world):
+    urdf = _urdf(tmp_path, ('<link name="world"/><joint name="wj" type="fixed">'
+                            '<parent link="world"/><child link="base_link"/></joint>'
+                            if world else "") + MOBILE)
+    out = tmp_path / "out"
+    subprocess.run(["urdf_usd_converter", str(urdf), str(out)], check=True,
+                   capture_output=True, text=True)
+    usd = out / "r.usda"
+    assert apply_world_link_rule(urdf, usd) is (not world)
+    assert find_synthetic_root_joint(Usd.Stage.Open(str(usd))) is None
+    # layered output: the Physics sublayer file was actually rewritten
+    assert ("root_joint" in (out / "Payload" / "Physics.usda").read_text()) is False
