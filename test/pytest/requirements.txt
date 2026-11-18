@@ -1,0 +1,5 @@
+# Python dependencies for the pytest suite (installed in the Dockerfile
+# devel-test stage). usd-core comes with urdf-usd-converter; do not pin it
+# separately, a mismatched usd-core breaks the converter's usdex import.
+urdf-usd-converter==0.4.0
+pytest>=8,<9
