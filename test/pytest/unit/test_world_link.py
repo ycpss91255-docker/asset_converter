@@ -1,14 +1,10 @@
-import shutil
 import subprocess
-import sys
 import textwrap
-from pathlib import Path
 
 import pytest
 from pxr import Usd
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from urdf2usd.world_link import (  # noqa: E402
+from urdf2usd.world_link import (
     apply_world_link_rule,
     WorldLinkError,
     find_synthetic_root_joint,
@@ -138,8 +134,6 @@ def test_apply_rejects_non_empty_world_link(tmp_path):
         apply_world_link_rule(urdf, _make_usd(tmp_path))
 
 
-@pytest.mark.skipif(shutil.which("urdf_usd_converter") is None,
-                    reason="urdf-usd-converter not installed")
 @pytest.mark.parametrize("world", [False, True])
 def test_with_real_converter(tmp_path, world):
     urdf = _urdf(tmp_path, ('<link name="world"/><joint name="wj" type="fixed">'
