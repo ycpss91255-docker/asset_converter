@@ -334,7 +334,9 @@ COPY test/pytest/requirements.txt /tmp/pytest-requirements.txt
 RUN python3 -m venv /opt/venv \
     && /opt/venv/bin/pip install --no-cache-dir -r /tmp/pytest-requirements.txt
 ENV PATH="/opt/venv/bin:${PATH}" \
-    PYTHONDONTWRITEBYTECODE=1
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/pytest_pkg
+COPY urdf2usd/ /pytest_pkg/urdf2usd/
 COPY test/pytest/ /pytest_test/
 
 ARG USER
