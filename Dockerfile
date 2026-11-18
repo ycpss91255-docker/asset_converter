@@ -324,10 +324,24 @@ COPY .base/dist/test/bats/smoke/devel-test/ /smoke_test/
 COPY test/bats/smoke/shared/                /smoke_test/
 COPY test/bats/smoke/devel-test/            /smoke_test/
 
+# pytest suite (repo-owned). Test-time only: the venv and the pytest
+# dependencies live in this ephemeral -test stage, not in `devel`. Python
+# comes from the Ubuntu base image (3.12, satisfies the 3.11+ requirement).
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends python3-venv \
+    && rm -rf /var/lib/apt/lists/*
+COPY test/pytest/requirements.txt /tmp/pytest-requirements.txt
+RUN python3 -m venv /opt/venv \
+    && /opt/venv/bin/pip install --no-cache-dir -r /tmp/pytest-requirements.txt
+ENV PATH="/opt/venv/bin:${PATH}" \
+    PYTHONDONTWRITEBYTECODE=1
+COPY test/pytest/ /pytest_test/
+
 ARG USER
 USER "${USER}"
 
-RUN bats /smoke_test/
+RUN bats /smoke_test/ \
+    && python -m pytest -q -p no:cacheprovider /pytest_test/
 
 ############################## builder + runtime split (optional) ##############################
 # Three concrete stages for repos that need a separate runtime image
