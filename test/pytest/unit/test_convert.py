@@ -3,10 +3,10 @@ import textwrap
 import pytest
 from pxr import Usd, UsdGeom, UsdPhysics
 
-from urdf2usd.convert import ConvertError, convert_urdf
-from urdf2usd.drive import drive_axis
-from urdf2usd.preflight import PreflightError
-from urdf2usd.world_link import find_synthetic_root_joint
+from asset_converter.convert import ConvertError, convert_urdf
+from asset_converter.drive import drive_axis
+from asset_converter.preflight import PreflightError
+from asset_converter.world_link import find_synthetic_root_joint
 
 _OBJ = textwrap.dedent("""\
     v 0 0 0

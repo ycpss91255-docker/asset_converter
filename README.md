@@ -1,4 +1,4 @@
-# urdf2usd
+# asset_converter
 
 URDF + TOML to USD conversion tooling. Supplements the official urdf-usd-converter with: DriveAPI from TOML, sensor prim creation, world link handling (fixed vs floating), concave collision pre-processing.
 

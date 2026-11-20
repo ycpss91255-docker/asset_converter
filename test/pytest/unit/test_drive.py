@@ -5,7 +5,7 @@ import textwrap
 import pytest
 from pxr import Usd, UsdPhysics
 
-from urdf2usd.drive import (
+from asset_converter.drive import (
     DriveError,
     DriveParams,
     apply_drive,
@@ -13,7 +13,7 @@ from urdf2usd.drive import (
     defaults_from_urdf_attrs,
     drive_axis,
 )
-from urdf2usd.world_link import apply_world_link_rule
+from asset_converter.world_link import apply_world_link_rule
 
 
 def _make_usd(tmp_path, extra=""):

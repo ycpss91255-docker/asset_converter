@@ -20,9 +20,9 @@ from typing import Mapping
 from pxr import Tf, Usd, UsdGeom
 from urdf_usd_converter import Converter
 
-from urdf2usd.drive import apply_drives
-from urdf2usd.preflight import check_urdf
-from urdf2usd.world_link import apply_world_link_rule
+from asset_converter.drive import apply_drives
+from asset_converter.preflight import check_urdf
+from asset_converter.world_link import apply_world_link_rule
 
 
 class ConvertError(ValueError):

@@ -1,6 +1,6 @@
 import pytest
 
-from urdf2usd.preflight import PreflightError, check_urdf
+from asset_converter.preflight import PreflightError, check_urdf
 
 OBJ = "o t\nv 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3\n"
 STL = "solid t\nendsolid t\n"

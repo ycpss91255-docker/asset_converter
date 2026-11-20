@@ -1,4 +1,4 @@
-# urdf2usd
+# asset_converter
 
 URDF + TOML 转 USD 转换工具。在官方 urdf-usd-converter 基础上补充：TOML 驱动的 DriveAPI、传感器 prim 创建、world link 处理（fixed vs floating）、凹面碰撞体预处理。
 
