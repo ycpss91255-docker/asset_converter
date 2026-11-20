@@ -48,7 +48,10 @@ def _resolve(
         name = parsed.netloc
         if name not in packages:
             return None, f"package '{name}' not in package map: {uri}"
-        return Path(packages[name]) / unquote(parsed.path).lstrip("/"), None
+        root = Path(packages[name])
+        if not root.is_absolute():
+            root = base / root  # relative to the URDF dir, like convert.py
+        return root / unquote(parsed.path).lstrip("/"), None
     return None, f"unsupported URI scheme '{scheme}': {uri}"
 
 

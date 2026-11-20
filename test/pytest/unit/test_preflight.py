@@ -114,3 +114,13 @@ def test_unparsable_urdf(tmp_path):
     p = tmp_path / "bad.urdf"
     p.write_text("<robot")
     assert _problems(p)
+
+
+def test_relative_package_path_is_relative_to_urdf_dir(tmp_path):
+    pkg = tmp_path / "pkgs" / "p"
+    pkg.mkdir(parents=True)
+    (pkg / "m.stl").write_text(STL)
+    src = tmp_path / "src"
+    src.mkdir()
+    urdf = _urdf(src, "package://p/m.stl")
+    check_urdf(urdf, packages={"p": "../pkgs/p"})
