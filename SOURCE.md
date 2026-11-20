@@ -8,7 +8,7 @@ Seed code extracted from ycpss91255-docker/isaac @ c068e3a.
 | seed/test/test_sensor_validation.py | test/unit/pytest/test_sensor_setup.py |
 
 This seed contains the full sensors.py including entangled OmniGraph code.
-Only the sensor-prim-creation layer belongs in urdf2usd:
+Only the sensor-prim-creation layer belongs in asset_converter:
 
 **Belongs here (layer a -- sensor prim creation in USD)**:
 - Config loading + validation: load_config, get_category, _validate_*, validate_camera
@@ -27,4 +27,4 @@ Only the sensor-prim-creation layer belongs in urdf2usd:
 - _build_graph_topology, _enable_extensions (Kit extension management)
 
 Refactoring to separate these layers is the next step.
-See ycpss91255-docker/isaac#309 and urdf2usd#1 for the design.
+See ycpss91255-docker/isaac#309 and asset_converter#1 for the design.
