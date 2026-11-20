@@ -5,6 +5,7 @@ from pxr import Usd, UsdGeom, UsdPhysics
 
 from urdf2usd.convert import ConvertError, convert_urdf
 from urdf2usd.drive import drive_axis
+from urdf2usd.preflight import PreflightError
 from urdf2usd.world_link import find_synthetic_root_joint
 
 _OBJ = textwrap.dedent("""\
@@ -79,8 +80,9 @@ def test_missing_map_raises_instead_of_silent_degradation(tmp_path):
     _, src = _make_package(tmp_path)
     urdf = src / "r.urdf"
     urdf.write_text(_pkg_urdf())
-    with pytest.raises(ConvertError, match="mesh"):
+    with pytest.raises(PreflightError, match="not in package map") as e:
         convert_urdf(urdf, tmp_path / "out")
+    assert not isinstance(e.value, ConvertError)
 
 
 def test_partial_degradation_is_detected(tmp_path):
@@ -92,8 +94,21 @@ def test_partial_degradation_is_detected(tmp_path):
         '<child link="other"/></joint>'
     )
     urdf.write_text(_pkg_urdf(bad + joint))
-    with pytest.raises(ConvertError):
+    with pytest.raises(PreflightError, match="nopkg") as e:
         convert_urdf(urdf, tmp_path / "out", {"mycam_description": pkg})
+    assert not isinstance(e.value, ConvertError)
+
+
+def test_missing_mesh_file_raises_preflight_error(tmp_path):
+    pkg, src = _make_package(tmp_path)
+    urdf = src / "r.urdf"
+    urdf.write_text(
+        _urdf(_mesh_link("base_link", "package://mycam_description/meshes/nope.obj"))
+    )
+    with pytest.raises(PreflightError, match="mesh file not found") as e:
+        convert_urdf(urdf, tmp_path / "out", {"mycam_description": pkg})
+    assert not isinstance(e.value, ConvertError)
+    assert not (tmp_path / "out").exists()  # failed before conversion
 
 
 def test_urdf_without_meshes_converts(tmp_path):

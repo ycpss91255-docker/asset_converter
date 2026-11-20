@@ -6,8 +6,9 @@ world link rule and the URDF-derived drives.
 The converter only auto-resolves ``package://`` when the URDF sits inside the
 package tree, and when a mesh cannot be resolved it logs a warning and emits an
 empty Xform (silent degradation, which also drops collision). This wrapper
+runs preflight.check_urdf first (PreflightError propagates unchanged), then
 compares the meshes referenced by the URDF with the Mesh prims in the output
-and raises ConvertError when some are missing.
+and raises ConvertError when some are missing (second guard).
 """
 
 from __future__ import annotations
@@ -20,6 +21,7 @@ from pxr import Tf, Usd, UsdGeom
 from urdf_usd_converter import Converter
 
 from urdf2usd.drive import apply_drives
+from urdf2usd.preflight import check_urdf
 from urdf2usd.world_link import apply_world_link_rule
 
 
@@ -78,6 +80,9 @@ def convert_urdf(
     """Convert a URDF and post-process it. Returns the root usda path."""
     urdf = Path(urdf_path).resolve()
     out = Path(out_dir).resolve()
+    # Raises PreflightError (unwrapped) before the converter can silently
+    # degrade; relative package paths resolve against the URDF dir.
+    check_urdf(urdf, packages)
     converter = Converter(ros_packages=_ros_packages(packages, urdf.parent))
     try:
         asset = converter.convert(str(urdf), str(out))
