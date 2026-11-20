@@ -4,7 +4,7 @@ import textwrap
 import pytest
 from pxr import Usd
 
-from urdf2usd.world_link import (
+from asset_converter.world_link import (
     apply_world_link_rule,
     WorldLinkError,
     find_synthetic_root_joint,

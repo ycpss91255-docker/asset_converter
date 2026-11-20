@@ -1,4 +1,4 @@
-"""UsdPhysics.DriveAPI from URDF-derived values (design: urdf2usd#21).
+"""UsdPhysics.DriveAPI from URDF-derived values (design: asset_converter#21).
 
 For every actuated joint in the converter output, apply ``DriveAPI``
 (``angular`` for revolute/continuous, ``linear`` for prismatic):

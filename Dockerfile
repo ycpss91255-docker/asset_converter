@@ -336,7 +336,7 @@ RUN python3 -m venv /opt/venv \
 ENV PATH="/opt/venv/bin:${PATH}" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONPATH=/pytest_pkg
-COPY urdf2usd/ /pytest_pkg/urdf2usd/
+COPY asset_converter/ /pytest_pkg/asset_converter/
 COPY test/pytest/ /pytest_test/
 
 ARG USER

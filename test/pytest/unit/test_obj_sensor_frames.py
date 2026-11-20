@@ -8,8 +8,8 @@ import subprocess
 import pytest
 from pxr import Gf, Usd, UsdGeom, UsdPhysics, UsdShade
 
-from urdf2usd.drive import apply_drives
-from urdf2usd.world_link import apply_world_link_rule
+from asset_converter.drive import apply_drives
+from asset_converter.world_link import apply_world_link_rule
 
 INERTIAL = ('<inertial><mass value="1"/><inertia ixx="1" iyy="1" izz="1" '
             'ixy="0" ixz="0" iyz="0"/></inertial>')

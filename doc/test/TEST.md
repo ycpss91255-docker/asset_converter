@@ -11,7 +11,7 @@ truth) -- regenerate it when you add or remove specs.
 
 ## Smoke specs
 
-### test/bats/smoke/shared/urdf2usd_env.bats (2)
+### test/bats/smoke/shared/asset_converter_env.bats (2)
 
 | Test | Description |
 |------|-------------|
